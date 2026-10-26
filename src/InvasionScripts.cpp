@@ -16,7 +16,8 @@ public:
         PLAYERHOOK_ON_LEVEL_CHANGED,
         PLAYERHOOK_ON_SPELL_CAST,
         PLAYERHOOK_ON_BEFORE_LOGOUT,
-        PLAYERHOOK_ON_PLAYER_RELEASED_GHOST
+        PLAYERHOOK_ON_PLAYER_RELEASED_GHOST,
+        PLAYERHOOK_ON_UPDATE_AREA
     }) {}
 
     void CheckAndLearnInvasionSpell(Player* player)
@@ -79,6 +80,12 @@ public:
     void OnPlayerReleasedGhost(Player* player) override
     {
         sInvasionMgr.OnReleaseSpirit(player);
+    }
+
+    void OnUpdateArea(Player* player, uint32 /*oldArea*/, uint32 /*newArea*/) override
+    {
+        if (player && sInvasionMgr.IsFighting(player->GetObjectGuid()))
+            sInvasionMgr.ApplyCombatantPvPFlags(player);
     }
 };
 

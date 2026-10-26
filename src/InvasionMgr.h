@@ -67,6 +67,9 @@ public:
     bool IsFighting(ObjectGuid guid) const;
     bool AreFoes(ObjectGuid a, ObjectGuid b) const;
 
+    void ApplyCombatantPvPFlags(Player* player);
+    void RemoveCombatantPvPFlags(Player* player);
+
     void GrantRespite(ObjectGuid defender);
     bool HasRespite(ObjectGuid defender) const;
 

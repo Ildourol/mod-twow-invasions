@@ -368,6 +368,26 @@ uint32 InvasionManager::GetInvaderCooldownRemaining(ObjectGuid invaderGuid) cons
     return (itr->second > now) ? uint32(itr->second - now) : 0;
 }
 
+void InvasionManager::ApplyCombatantPvPFlags(Player* player)
+{
+    if (!player || !player->IsInWorld())
+        return;
+
+    player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+    player->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+    ResendPlayerFlags(player);
+}
+
+void InvasionManager::RemoveCombatantPvPFlags(Player* player)
+{
+    if (!player || !player->IsInWorld())
+        return;
+
+    player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+    player->RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+    ResendPlayerFlags(player);
+}
+
 void InvasionManager::EngageBotInCombat(Player* botPlayer, Player* targetPlayer)
 {
     if (!botPlayer || !targetPlayer || !IsHeadlessBot(botPlayer))
@@ -600,12 +620,9 @@ void InvasionManager::Arrive(Invasion& inv, Player* invader, Player* defender)
     inv.phase = PHASE_FIGHTING;
     inv.timer = sConfig.GetIntDefault("Invasion.DurationSeconds", 300) * IN_MILLISECONDS;
 
-    // Apply FFA PvP flag so combatants can attack each other regardless of faction or sanctuary
-    invader->SetFFAPvP(true);
-    defender->SetFFAPvP(true);
-
-    ResendPlayerFlags(invader);
-    ResendPlayerFlags(defender);
+    // Apply both server and client FFA PvP flags so same-faction combatants can attack each other
+    ApplyCombatantPvPFlags(invader);
+    ApplyCombatantPvPFlags(defender);
 
     GrantRespite(inv.defender);
 
@@ -732,11 +749,9 @@ void InvasionManager::Conclude(Invasion& inv, char const* invaderLine, char cons
     Player* pInvader = sObjectAccessor.FindPlayer(inv.invader);
     Player* pDefender = sObjectAccessor.FindPlayer(inv.defender);
 
-    // Revert FFA PvP flag upon match completion
-    if (pInvader)
-        pInvader->SetFFAPvP(false);
-    if (pDefender)
-        pDefender->SetFFAPvP(false);
+    // Revert FFA PvP flags upon match completion
+    RemoveCombatantPvPFlags(pInvader);
+    RemoveCombatantPvPFlags(pDefender);
 
     if (winner && pInvader && pDefender)
     {
@@ -841,6 +856,7 @@ bool InvasionManager::OnPlayerLogout(Player* player)
         if (wasInvader)
         {
             ResetBotAI(player);
+            RemoveCombatantPvPFlags(player);
             player->TeleportTo(itr->origin.mapId, itr->origin.x, itr->origin.y,
                                itr->origin.z, itr->origin.o);
 
@@ -849,7 +865,7 @@ bool InvasionManager::OnPlayerLogout(Player* player)
             HideRadar(defender);
             if (defender)
             {
-                defender->SetFFAPvP(false);
+                RemoveCombatantPvPFlags(defender);
                 ResetBotAI(defender);
             }
             ResendPlayerFlags(defender);
@@ -1115,6 +1131,11 @@ void InvasionManager::Update(uint32 diff)
                         inv.arrivalFx = false;
                     }
                 }
+
+                // Maintain both server and client FFA PvP hostility flags on both combatants
+                ApplyCombatantPvPFlags(invader);
+                if (defender)
+                    ApplyCombatantPvPFlags(defender);
 
                 // Ensure bots stay actively focused and do not stay static or drop target
                 if (inv.isBotInvader && invader->IsAlive() && defender && defender->IsAlive())
