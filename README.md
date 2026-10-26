@@ -10,37 +10,47 @@
 ---
 
 [![Turtle WoW](https://img.shields.io/badge/Turtle_WoW-1.18.1%20%2F%201.12.1-orange.svg)](https://turtle-wow.org/)
-[![Engine](https://img.shields.io/badge/Core-vMaNGOS%20(tortoise--wow)-blue.svg)]()
+[![Engine](https://img.shields.io/badge/Core-tortoise--wow%20(vMaNGOS)-blue.svg)]()
 [![PlayerBots](https://img.shields.io/badge/AI-TortoiseBots%20Compatible-green.svg)]()
+[![Origin](https://img.shields.io/badge/Origin-ComfyCraft-purple.svg)]()
 [![License](https://img.shields.io/badge/License-GPL%20v2-red.svg)](LICENSE)
 
 ---
 
-## ⚔️ Overview
+## 📖 Origin & Attribution
 
-**`mod-twow-invasions`** brings the tension and thrill of Dark Souls asynchronous world invasions to Vanilla WoW. Whether initiated by a real player or an autonomous wandering PlayerBot, combatants channel a 6-second fiery rite, lock their PvP flags, and teleport directly behind their quarry anywhere across Azeroth's open world.
+> [!NOTE]
+> This module was originally designed and created for **ComfyCraft** (`InvasionMgr`). It has been decoupled from monolithic core code, ported, and significantly extended to work natively as a 100% standalone, non-intrusive module for **`tortoise-wow`** (Turtle WoW custom vMaNGOS) and **`TortoiseBots`**.
 
-The hunt is balanced, non-intrusive, and thrilling:
-1. **The Stalking Warning**: The defender receives an ominous screen prompt (*"Something has come to forgive you"*) 5 seconds before the invader lands, allowing a moment to prepare.
-2. **The Ambush**: The invader teleports **10 yards directly behind** the defender with a dark visual effect (`ARRIVE_KIT`), while stealth is preserved for Rogues and Druids.
-3. **The 100-Yard Arena Leash**: An invisible duel boundary forms around the arrival point. Fleeing further than 100 yards triggers a 10-second countdown to return or forfeit.
-4. **Asymmetric Death**: A defeated defender revives over their corpse without running from a distant graveyard; a fallen invader is carried home to their starting location dead and automatically resurrected.
+### 🌟 Turtle WoW (`tortoise-wow`) & PlayerBot Extensions:
+- **Autolearned Spellbook Mode**: Directly learned in the Spellbook (General tab) upon reaching level 10 (`Invasion.MinLevel`). No inventory clutter or bag space required.
+- **Autonomous PlayerBot Phantoms**: Wandering PlayerBots can invade real players like Dark Souls NPC Phantoms (*Kirk*, *Mildred*), players can invade bots as fallback, and bots can invade bots.
+- **Zero Core Patches (The Unediting Doctrine)**: Mutual hostility across factions and in town sanctuaries is achieved through temporary `SetFFAPvP(true)` inside the 100-yard arena, completely eliminating the need for ComfyCraft's hardcoded core `GetReactionTo` modifications.
+- **Dual Access Modes**: Seamless support for Spellbook mode (Mode 1), physical inventory Talisman (Mode 2), or Hybrid (Mode 3).
+- **PvP Victor Rewards**: Direct Honor and Gold payouts awarded to match victors.
 
 ---
 
-## ✨ Key Features
+## ⚔️ Overview & Gameplay Flow
 
-- **🔥 Autolearned Spell Mode (Default)**: Automatically unlocked directly in the Spellbook (General tab) upon reaching level 10 (`Invasion.MinLevel`). No inventory clutter or bag space needed.
-- **📜 Optional Physical Talisman**: Configurable option to enable the physical *Invader's Sigil* (Item `100035`) and gossip vendor NPC *Mordrin the Marked* (`100031`) for classic roleplay feel.
+1. **The Stalking Warning**: The defender receives an ominous screen prompt (*"Something has come to forgive you"*) 5 seconds before the invader lands, allowing a moment to prepare.
+2. **The Ambush**: The invader teleports **10 yards directly behind** the defender with a dark visual effect (`ARRIVE_KIT`), while stealth is preserved for Rogues and Druids.
+3. **The 100-Yard Arena Leash**: An invisible duel boundary forms around the arrival point. Fleeing further than 100 yards triggers a 10-second countdown to return or forfeit.
+4. **Asymmetric Death**: A defeated defender revives directly over their corpse without running from a distant graveyard; a fallen invader is carried home to their starting location dead and automatically resurrected.
+
+---
+
+## ✨ Features
+
+- **🔥 Autolearned Spell Mode (Default)**: Automatically unlocked directly in the Spellbook upon reaching level 10 (`Invasion.MinLevel`).
+- **📜 Optional Physical Talisman**: Configurable option to enable the physical *Invader's Sigil* (Item `100035`) and gossip vendor NPC *Mordrin the Marked* (`100031`).
 - **🤖 Autonomous PlayerBot Phantom Invasions**:
-  - **Bot $\rightarrow$ Player**: Wandering PlayerBots can channel the rite and invade real players like Dark Souls NPC Phantoms (*Kirk*, *Mildred*).
-  - **Player $\rightarrow$ Bot**: When no real human players are flagged or online, matchmaking falls back to roaming PlayerBots so the rite never fails.
+  - **Bot $\rightarrow$ Player**: Wandering PlayerBots can channel the rite and invade real players.
+  - **Player $\rightarrow$ Bot**: When no real human players are flagged or online, matchmaking falls back to roaming PlayerBots.
   - **Bot $\rightarrow$ Bot**: Autonomous simulated world PvP encounters across factions.
   - **Balanced Pacing**: Configurable check intervals (`Invasion.BotInvasionInterval`), roll chances (`Invasion.BotInvasionChance`), personal bot cooldowns, and realm-wide active invasion caps.
-- **🛡️ Zero Core Patches (The Unediting Doctrine)**:
-  - 100% standalone C++ module operating entirely through `ScriptObjects.h` lifecycle callbacks (`PlayerScript`, `WorldScript`, `UnitScript`, `ItemScript`).
-  - Cross-faction and sanctuary town hostility is enforced via `SetFFAPvP(true)` during the match, cleanly reverting on conclusion without modifying core `GetReactionTo`.
-- **📡 Minimap Radar Tracking**: Real-time positional radar updates transmitted via the `CINV` addon channel every 250ms, rendering skull tracking dots on compatible client addons.
+- **🛡️ Strictly Non-Intrusive**: Zero core modifications to `tortoise-wow` or `TortoiseBots`.
+- **📡 Minimap Radar Tracking**: Real-time positional radar updates transmitted via the `CINV` addon channel every 250ms.
 - **🏆 Standard PvP Rewards**: Victorious invaders and defenders receive standard PvP Honor points and Gold directly into their purse.
 - **🕊️ Anti-Grief Respite Timer**: Invaded defenders receive an immunity cooldown (default: 10 minutes) preventing back-to-back harassment.
 
@@ -107,5 +117,5 @@ Invasion.BotMaxActiveInvasions = 3
 ## 📄 License & Credits
 
 - Licensed under **GPL v2**.
-- Designed for **Turtle WoW** and the **vMaNGOS** community.
-- Original invasion concept inspired by Dark Souls asynchronous multiplayer.
+- **ComfyCraft**: Original invasion system concept, items, and mechanics.
+- **tortoise-wow & TortoiseBots**: Native Turtle vMaNGOS architecture, standalone decoupling, non-intrusive FFA hostility, and autonomous PlayerBot phantom integrations.

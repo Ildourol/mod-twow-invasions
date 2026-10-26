@@ -1,3 +1,9 @@
+# Workspace and documentation files excluded from repository
+AGENTS.md
+docs/
+tests/
+.gitkeep
+
 # Build artifacts and editor directories
 build/
 bin/
