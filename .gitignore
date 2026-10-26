@@ -1,0 +1,14 @@
+# Build artifacts and editor directories
+build/
+bin/
+*.obj
+*.lib
+*.dll
+*.exe
+*.pdb
+*.log
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo

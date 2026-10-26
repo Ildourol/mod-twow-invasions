@@ -1,0 +1,88 @@
+# =============================================================================
+# mod-twow-invasions: World PvP Invasions & PlayerBot Phantoms
+# =============================================================================
+[ModuleConf]
+
+# Enable or disable the entire Invasion module (Default: 1)
+Invasion.Enable = 1
+
+# Debug Logging (0 = Off, 1 = Verbose console & server log diagnostics)
+Invasion.Debug = 0
+
+# -----------------------------------------------------------------------------
+# Access Modes & Capabilities
+# -----------------------------------------------------------------------------
+# Mode 1 = Autolearned Spell only (Default)
+# Mode 2 = Optional Talisman / Item only (Invader's Sigil + Mordrin the Marked)
+# Mode 3 = Hybrid (Both Spell and Item enabled simultaneously)
+Invasion.AccessMode = 1
+
+# Minimum level required to learn and use the invasion rite (Default: 10)
+Invasion.MinLevel = 10
+
+# Spell ID used for the invasion rite (Default: 51942 - Shards of Hellfury)
+Invasion.SpellId = 51942
+
+# Enable the physical Talisman (Item 100035) & NPC Mordrin the Marked (Entry 100031)
+# (Default: 0 / Off; automatically active if AccessMode is 2 or 3)
+Invasion.EnableTalisman = 0
+
+# -----------------------------------------------------------------------------
+# Matchmaking & Arena Rules
+# -----------------------------------------------------------------------------
+# Level bracket range (+/- levels) for finding an eligible opponent (Default: 3)
+Invasion.LevelRange = 3
+
+# Warning countdown in seconds before the invader lands behind the target (Default: 5)
+Invasion.WarnSeconds = 5
+
+# Maximum duration of an invasion duel in seconds (Default: 300 / 5 minutes)
+Invasion.DurationSeconds = 300
+
+# Respite immunity time in seconds for defenders after being invaded (Default: 600 / 10 minutes)
+Invasion.RespiteSeconds = 600
+
+# Distance in yards behind defender to land on arrival (Default: 10)
+Invasion.ArriveDistance = 10
+
+# Return delay in seconds for victorious invader before being sent home (Default: 5)
+Invasion.ReturnSeconds = 5
+
+# Death linger in seconds for fallen invader lying on site before ride home (Default: 10)
+Invasion.DeathLingerSeconds = 10
+
+# Revive delay in seconds once fallen invader arrives back home (Default: 3)
+Invasion.ReviveSeconds = 3
+
+# -----------------------------------------------------------------------------
+# Victory Rewards
+# -----------------------------------------------------------------------------
+# Bonus PvP Honor awarded to the victor (Default: 75)
+Invasion.RewardHonor = 75
+
+# Bonus Gold awarded to the victor in copper (Default: 5000 = 50 silver)
+Invasion.RewardMoney = 5000
+
+# -----------------------------------------------------------------------------
+# PlayerBot Matrix & Extended Balance Options
+# -----------------------------------------------------------------------------
+# Allow human players to invade wandering PlayerBots if no humans are available (Default: 1)
+Invasion.AllowPlayerToBot = 1
+
+# Allow autonomous PlayerBots to invade real human players (Default: 1)
+Invasion.AllowBotToPlayer = 1
+
+# Allow autonomous PlayerBots to invade other PlayerBots (Default: 1)
+Invasion.AllowBotToBot = 1
+
+# Interval in seconds between bot invasion attempts (Default: 300 / 5 minutes)
+Invasion.BotInvasionInterval = 300
+
+# Percentage chance (1-100) per interval check to launch a bot invasion (Default: 30)
+Invasion.BotInvasionChance = 30
+
+# Cooldown in seconds before an individual bot can participate in another invasion (Default: 600)
+Invasion.BotCooldownSeconds = 600
+
+# Maximum concurrent bot invasions running at the same time across the realm (Default: 3)
+Invasion.BotMaxActiveInvasions = 3
