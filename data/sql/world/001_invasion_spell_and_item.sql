@@ -17,12 +17,12 @@ VALUES
    22952, 3, 0,
    0, 0, 0, -1, -1,
    1, 10, 1, 1, 1, 6, 0,
-   51942, 0, 0, 'item_invasion_sigil');
+   44090, 0, 0, 'item_invasion_sigil');
 
 -- ----------------------------------------------------------------------------
--- 2. Spell 51942 (Rite of Invasion) Script Binding & Server Template
+-- 2. Spell 44090 (Bloodstone Ritual) Script Binding & Server Template
 -- ----------------------------------------------------------------------------
-UPDATE `spell_template` SET `name` = 'Rite of Invasion', `script_name` = 'spell_invasion_search' WHERE `entry` = 51942;
+UPDATE `spell_template` SET `script_name` = 'spell_invasion_search' WHERE `entry` = 44090;
 
 -- ----------------------------------------------------------------------------
 -- 3. Mordrin the Marked (Creature 100031) - Talisman Giver NPC

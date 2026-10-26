@@ -31,7 +31,7 @@ public:
             return;
 
         uint32 const minLevel = sConfig.GetIntDefault("Invasion.MinLevel", 10);
-        uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 51942);
+        uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 44090);
 
         if (player->GetLevel() >= minLevel && !player->HasSpell(spellId))
         {
@@ -57,7 +57,7 @@ public:
         if (!player || !spell || !spell->m_spellInfo)
             return;
 
-        uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 51942);
+        uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 44090);
         if (spell->m_spellInfo->Id != spellId)
             return;
 
@@ -84,7 +84,7 @@ public:
 
     void OnUpdateArea(Player* player, uint32 /*oldArea*/, uint32 /*newArea*/) override
     {
-        if (player && sInvasionMgr.IsFighting(player->GetObjectGuid()))
+        if (player && sInvasionMgr.IsSameFactionFight(player->GetObjectGuid()))
             sInvasionMgr.ApplyCombatantPvPFlags(player);
     }
 };
@@ -160,7 +160,7 @@ public:
         if (!sInvasionMgr.CanBeginInvasion(player))
             return true;
 
-        // Returning false allows the item's ON_USE spell (51942) to cast for 6 seconds
+        // Returning false allows the item's ON_USE spell (44090) to cast for 6 seconds
         return false;
     }
 };

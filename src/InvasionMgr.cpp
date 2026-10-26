@@ -343,7 +343,7 @@ void InvasionManager::GrantInvaderCooldown(Player* invader)
     time_t const now = time(nullptr);
     m_invaderCooldowns[invader->GetObjectGuid()] = now + seconds;
 
-    uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 51942);
+    uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 44090);
     time_t const endTime = now + seconds;
 
     invader->AddSpellCooldown(spellId, 0, endTime);
@@ -590,6 +590,7 @@ bool InvasionManager::BeginInvasion(Player* invader, Player* designatedDefender)
     inv.timer = sConfig.GetIntDefault("Invasion.WarnSeconds", 5) * IN_MILLISECONDS;
     inv.isBotInvader = IsHeadlessBot(invader);
     inv.isBotDefender = IsHeadlessBot(defender);
+    inv.isSameFaction = (invader->GetTeam() == defender->GetTeam());
 
     m_invasions.push_back(inv);
 
@@ -620,9 +621,13 @@ void InvasionManager::Arrive(Invasion& inv, Player* invader, Player* defender)
     inv.phase = PHASE_FIGHTING;
     inv.timer = sConfig.GetIntDefault("Invasion.DurationSeconds", 300) * IN_MILLISECONDS;
 
-    // Apply both server and client FFA PvP flags so same-faction combatants can attack each other
-    ApplyCombatantPvPFlags(invader);
-    ApplyCombatantPvPFlags(defender);
+    // Apply both server and client FFA PvP flags ONLY for same-faction duels so they can attack each other.
+    // For cross-faction duels (Alliance vs Horde), normal PvP hostility applies without FFA flags.
+    if (inv.isSameFaction)
+    {
+        ApplyCombatantPvPFlags(invader);
+        ApplyCombatantPvPFlags(defender);
+    }
 
     GrantRespite(inv.defender);
 
@@ -749,9 +754,12 @@ void InvasionManager::Conclude(Invasion& inv, char const* invaderLine, char cons
     Player* pInvader = sObjectAccessor.FindPlayer(inv.invader);
     Player* pDefender = sObjectAccessor.FindPlayer(inv.defender);
 
-    // Revert FFA PvP flags upon match completion
-    RemoveCombatantPvPFlags(pInvader);
-    RemoveCombatantPvPFlags(pDefender);
+    // Revert FFA PvP flags upon match completion if this was a same-faction duel
+    if (inv.isSameFaction)
+    {
+        RemoveCombatantPvPFlags(pInvader);
+        RemoveCombatantPvPFlags(pDefender);
+    }
 
     if (winner && pInvader && pDefender)
     {
@@ -856,7 +864,8 @@ bool InvasionManager::OnPlayerLogout(Player* player)
         if (wasInvader)
         {
             ResetBotAI(player);
-            RemoveCombatantPvPFlags(player);
+            if (itr->isSameFaction)
+                RemoveCombatantPvPFlags(player);
             player->TeleportTo(itr->origin.mapId, itr->origin.x, itr->origin.y,
                                itr->origin.z, itr->origin.o);
 
@@ -865,7 +874,8 @@ bool InvasionManager::OnPlayerLogout(Player* player)
             HideRadar(defender);
             if (defender)
             {
-                RemoveCombatantPvPFlags(defender);
+                if (itr->isSameFaction)
+                    RemoveCombatantPvPFlags(defender);
                 ResetBotAI(defender);
             }
             ResendPlayerFlags(defender);
@@ -982,6 +992,14 @@ bool InvasionManager::AreFoes(ObjectGuid a, ObjectGuid b) const
     return false;
 }
 
+bool InvasionManager::IsSameFactionFight(ObjectGuid guid) const
+{
+    for (auto const& inv : m_invasions)
+        if (inv.phase == PHASE_FIGHTING && inv.isSameFaction && (inv.invader == guid || inv.defender == guid))
+            return true;
+    return false;
+}
+
 uint32 InvasionManager::GetActiveBotInvasionsCount() const
 {
     uint32 count = 0;
@@ -1017,7 +1035,7 @@ void InvasionManager::CheckAutonomousBotInvasions(uint32 diff)
         return;
 
     uint32 const minLevel = sConfig.GetIntDefault("Invasion.MinLevel", 10);
-    uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 51942);
+    uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 44090);
 
     std::vector<Player*> botCandidates;
     {
@@ -1070,8 +1088,8 @@ void InvasionManager::Update(uint32 diff)
         if (!invader || (!invader->IsInWorld() && !invader->IsBeingTeleported()))
         {
             HideRadar(defender);
-            if (defender)
-                defender->SetFFAPvP(false);
+            if (defender && inv.isSameFaction)
+                RemoveCombatantPvPFlags(defender);
             ResendPlayerFlags(defender);
             m_invasions.erase(m_invasions.begin() + i);
             continue;
@@ -1132,10 +1150,13 @@ void InvasionManager::Update(uint32 diff)
                     }
                 }
 
-                // Maintain both server and client FFA PvP hostility flags on both combatants
-                ApplyCombatantPvPFlags(invader);
-                if (defender)
-                    ApplyCombatantPvPFlags(defender);
+                // Maintain server and client FFA PvP hostility flags ONLY for same-faction duels
+                if (inv.isSameFaction)
+                {
+                    ApplyCombatantPvPFlags(invader);
+                    if (defender)
+                        ApplyCombatantPvPFlags(defender);
+                }
 
                 // Ensure bots stay actively focused and do not stay static or drop target
                 if (inv.isBotInvader && invader->IsAlive() && defender && defender->IsAlive())

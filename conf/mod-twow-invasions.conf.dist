@@ -20,8 +20,8 @@ Invasion.AccessMode = 1
 # Minimum level required to learn and use the invasion rite (Default: 10)
 Invasion.MinLevel = 10
 
-# Spell ID used for the invasion rite (Default: 51942 - Shards of Hellfury)
-Invasion.SpellId = 51942
+# Spell ID used for the invasion rite (Default: 44090 - Bloodstone Ritual)
+Invasion.SpellId = 44090
 
 # Enable the physical Talisman (Item 100035) & NPC Mordrin the Marked (Entry 100031)
 # (Default: 0 / Off; automatically active if AccessMode is 2 or 3)

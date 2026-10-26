@@ -36,6 +36,7 @@ struct Invasion
     uint32 leaveKit = 0;        // departure visual effect
     bool isBotInvader = false;  // invader is a headless bot session
     bool isBotDefender = false; // defender is a headless bot session
+    bool isSameFaction = false; // combatants belong to the same faction (requires FFA flags)
 };
 
 struct PendingRevive
@@ -66,6 +67,7 @@ public:
     bool IsInvading(ObjectGuid guid) const;
     bool IsFighting(ObjectGuid guid) const;
     bool AreFoes(ObjectGuid a, ObjectGuid b) const;
+    bool IsSameFactionFight(ObjectGuid guid) const;
 
     void ApplyCombatantPvPFlags(Player* player);
     void RemoveCombatantPvPFlags(Player* player);
