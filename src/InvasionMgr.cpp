@@ -220,9 +220,16 @@ bool InvasionManager::IsValidDefender(Player* invader, Player* target) const
     if (!target->IsPvP())
         return false;
 
+    uint32 const minLevel = sConfig.GetIntDefault("Invasion.MinLevel", 10);
     uint32 const range = sConfig.GetIntDefault("Invasion.LevelRange", 3);
     uint32 const mine = invader->GetLevel();
     uint32 const theirs = target->GetLevel();
+
+    // Strict minimum level protection for defender
+    if (theirs < minLevel)
+        return false;
+
+    // Bracket check: target must be within [mine - range, mine + range]
     if (theirs + range < mine || mine + range < theirs)
         return false;
 
