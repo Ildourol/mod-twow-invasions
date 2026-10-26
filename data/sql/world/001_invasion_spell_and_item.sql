@@ -20,9 +20,9 @@ VALUES
    51942, 0, 0, 'item_invasion_sigil');
 
 -- ----------------------------------------------------------------------------
--- 2. Spell 51942 (Shards of Hellfury) Script Binding
+-- 2. Spell 51942 (Rite of Invasion) Script Binding & Server Template
 -- ----------------------------------------------------------------------------
-UPDATE `spell_template` SET `script_name` = 'spell_invasion_search' WHERE `entry` = 51942;
+UPDATE `spell_template` SET `name` = 'Rite of Invasion', `script_name` = 'spell_invasion_search' WHERE `entry` = 51942;
 
 -- ----------------------------------------------------------------------------
 -- 3. Mordrin the Marked (Creature 100031) - Talisman Giver NPC

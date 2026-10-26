@@ -145,6 +145,20 @@ bool InvasionManager::IsAvailableForInvasion(Player* player) const
     if (player->InBattleGround() || !player->GetMap() || player->GetMap()->Instanceable())
         return false;
 
+    // Check City and Tavern resting protection
+    if (!sConfig.GetBoolDefault("Invasion.AllowInCities", true))
+    {
+        if (player->GetRestType() == REST_TYPE_IN_CITY || player->GetRestType() == REST_TYPE_IN_TAVERN)
+            return false;
+    }
+
+    // Check Sanctuary zone protection
+    if (!sConfig.GetBoolDefault("Invasion.AllowInSanctuaries", true))
+    {
+        if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+            return false;
+    }
+
     return true;
 }
 
