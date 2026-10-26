@@ -53,6 +53,8 @@
 - **📡 Minimap Radar Tracking**: Real-time positional radar updates transmitted via the `CINV` addon channel every 250ms.
 - **🏆 Standard PvP Rewards**: Victorious invaders and defenders receive standard PvP Honor points and Gold directly into their purse.
 - **🕊️ Anti-Grief Respite Timer**: Invaded defenders receive an immunity cooldown (default: 10 minutes) preventing back-to-back harassment.
+- **⏱️ Action Bar Cooldown Wheel**: Configurable invader cooldown (`Invasion.InvaderCooldownSeconds`) preventing spamming and rendering native rotating spell cooldown clocks on the action bar.
+- **⚔️ Same-Faction Invasions**: Configurable toggle (`Invasion.AllowSameFaction = 1`) enabling cross-faction and same-faction Dark Souls-style invasions without core edits.
 
 ---
 
@@ -72,6 +74,8 @@ Invasion.EnableTalisman = 0
 
 # Matchmaking & Rules
 Invasion.LevelRange = 3
+Invasion.AllowSameFaction = 1
+Invasion.InvaderCooldownSeconds = 60
 Invasion.WarnSeconds = 5
 Invasion.DurationSeconds = 300
 Invasion.RespiteSeconds = 600

@@ -73,6 +73,10 @@ public:
     void GrantBotCooldown(ObjectGuid botGuid);
     bool HasBotCooldown(ObjectGuid botGuid) const;
 
+    void GrantInvaderCooldown(Player* invader);
+    bool HasInvaderCooldown(ObjectGuid invaderGuid) const;
+    uint32 GetInvaderCooldownRemaining(ObjectGuid invaderGuid) const;
+
     uint32 GetActiveBotInvasionsCount() const;
     void CheckAutonomousBotInvasions(uint32 diff);
 
@@ -97,6 +101,7 @@ private:
     std::vector<PendingRevive> m_revives;
     std::unordered_map<ObjectGuid, time_t> m_respite;
     std::unordered_map<ObjectGuid, time_t> m_botCooldowns;
+    std::unordered_map<ObjectGuid, time_t> m_invaderCooldowns;
     uint32 m_botCheckTimer = 0;
 };
 

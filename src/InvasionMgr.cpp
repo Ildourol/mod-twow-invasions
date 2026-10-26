@@ -171,6 +171,15 @@ bool InvasionManager::CanInvadeFrom(Player* invader) const
         return false;
     }
 
+    if (HasInvaderCooldown(invader->GetObjectGuid()))
+    {
+        uint32 const remaining = GetInvaderCooldownRemaining(invader->GetObjectGuid());
+        char msg[128];
+        snprintf(msg, sizeof(msg), "You must rest before seeking another soul (%u seconds remaining).", remaining);
+        Tell(invader, msg);
+        return false;
+    }
+
     if (invader->IsInCombat())
     {
         Tell(invader, "Not while you are in combat.");
@@ -231,6 +240,11 @@ bool InvasionManager::IsValidDefender(Player* invader, Player* target) const
 
     // Bracket check: target must be within [mine - range, mine + range]
     if (theirs + range < mine || mine + range < theirs)
+        return false;
+
+    // Same-faction invasion check
+    bool const allowSameFaction = sConfig.GetBoolDefault("Invasion.AllowSameFaction", true);
+    if (!allowSameFaction && invader->GetTeam() == target->GetTeam())
         return false;
 
     if (invader->GetGroup() && invader->GetGroup() == target->GetGroup())
@@ -295,6 +309,43 @@ bool InvasionManager::HasBotCooldown(ObjectGuid botGuid) const
 {
     auto const itr = m_botCooldowns.find(botGuid);
     return itr != m_botCooldowns.end() && itr->second > time(nullptr);
+}
+
+void InvasionManager::GrantInvaderCooldown(Player* invader)
+{
+    if (!invader)
+        return;
+
+    uint32 const seconds = sConfig.GetIntDefault("Invasion.InvaderCooldownSeconds", 60);
+    if (!seconds)
+        return;
+
+    time_t const now = time(nullptr);
+    m_invaderCooldowns[invader->GetObjectGuid()] = now + seconds;
+
+    uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 51942);
+    time_t const endTime = now + seconds;
+
+    invader->AddSpellCooldown(spellId, 0, endTime);
+    invader->SendSpellCooldown(spellId, seconds * IN_MILLISECONDS, invader->GetObjectGuid());
+
+    DebugLog("Granted invader cooldown to %s for %u seconds", invader->GetName(), seconds);
+}
+
+bool InvasionManager::HasInvaderCooldown(ObjectGuid invaderGuid) const
+{
+    auto const itr = m_invaderCooldowns.find(invaderGuid);
+    return itr != m_invaderCooldowns.end() && itr->second > time(nullptr);
+}
+
+uint32 InvasionManager::GetInvaderCooldownRemaining(ObjectGuid invaderGuid) const
+{
+    auto const itr = m_invaderCooldowns.find(invaderGuid);
+    if (itr == m_invaderCooldowns.end())
+        return 0;
+
+    time_t const now = time(nullptr);
+    return (itr->second > now) ? uint32(itr->second - now) : 0;
 }
 
 Player* InvasionManager::PickDefender(Player* invader) const
@@ -376,6 +427,9 @@ bool InvasionManager::CanBeginInvasion(Player* invader)
 
     for (auto itr = m_botCooldowns.begin(); itr != m_botCooldowns.end();)
         itr = (itr->second <= now) ? m_botCooldowns.erase(itr) : ++itr;
+
+    for (auto itr = m_invaderCooldowns.begin(); itr != m_invaderCooldowns.end();)
+        itr = (itr->second <= now) ? m_invaderCooldowns.erase(itr) : ++itr;
 
     return CanInvadeFrom(invader);
 }
@@ -594,6 +648,8 @@ void InvasionManager::Conclude(Invasion& inv, char const* invaderLine, char cons
     if (inv.phase == PHASE_FIGHTING)
     {
         GrantRespite(inv.defender);
+        if (pInvader && !inv.isBotInvader)
+            GrantInvaderCooldown(pInvader);
         if (inv.isBotInvader)
             GrantBotCooldown(inv.invader);
         if (inv.isBotDefender)

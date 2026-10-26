@@ -31,12 +31,26 @@ Invasion.EnableTalisman = 0
 # Matchmaking & Arena Rules
 # -----------------------------------------------------------------------------
 # Level bracket range (+/- levels) for finding an eligible opponent (Default: 3)
+# The bracket is strictly symmetrical: [PlayerLevel - LevelRange, PlayerLevel + LevelRange].
+# Example 1: At Level 25 with LevelRange = 3, matches targets between Level 22 and 28.
+# Example 2: At Level 10 with LevelRange = 3, matches targets between Level 10 and 13 (held at MinLevel floor).
 Invasion.LevelRange = 3
+
+# Allow same-faction invasions (Alliance vs Alliance, Horde vs Horde)
+# 1 = Enabled (Default, allows cross-faction and same-faction Dark Souls-style invasions)
+# 0 = Disabled (Strictly opposing faction only: Alliance vs Horde)
+Invasion.AllowSameFaction = 1
+
+# Cooldown in seconds placed on the invader after completing an invasion
+# 0 = No cooldown (original ComfyCraft behavior, hunt again immediately)
+# >0 = Prevents spamming and displays rotating cooldown clock on action bar (Default: 60)
+Invasion.InvaderCooldownSeconds = 60
 
 # Warning countdown in seconds before the invader lands behind the target (Default: 5)
 Invasion.WarnSeconds = 5
 
 # Maximum duration of an invasion duel in seconds (Default: 300 / 5 minutes)
+# When this timer expires, the match concludes as a draw and invader is teleported home.
 Invasion.DurationSeconds = 300
 
 # Respite immunity time in seconds for defenders after being invaded (Default: 600 / 10 minutes)
