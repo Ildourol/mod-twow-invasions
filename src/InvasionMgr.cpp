@@ -457,7 +457,7 @@ void InvasionManager::Arrive(Invasion& inv, Player* invader, Player* defender)
     // Bot instant aggression command
     if (inv.isBotInvader)
     {
-        invader->SetSelection(defender->GetObjectGuid());
+        invader->SetSelectionGuid(defender->GetObjectGuid());
         invader->Attack(defender, true);
         DebugLog("Bot invader %s commanded to attack defender %s", invader->GetName(), defender->GetName());
     }
@@ -548,7 +548,7 @@ void InvasionManager::AwardRewards(Player* winner, Player* loser)
     // Honor reward
     uint32 const honorReward = sConfig.GetIntDefault("Invasion.RewardHonor", 75);
     if (honorReward)
-        winner->RewardHonor(loser, 1, honorReward);
+        winner->RewardHonor(loser, 1);
 
     // Gold reward
     uint32 const moneyReward = sConfig.GetIntDefault("Invasion.RewardMoney", 5000);

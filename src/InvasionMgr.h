@@ -91,6 +91,7 @@ private:
                   uint32 delayMs = 0, ObjectGuid winner = ObjectGuid());
     void RecordMatch(Invasion const& inv, ObjectGuid winner);
     void AwardRewards(Player* winner, Player* loser);
+    void UpdateRevives(uint32 diff);
 
     std::vector<Invasion> m_invasions;
     std::vector<PendingRevive> m_revives;
