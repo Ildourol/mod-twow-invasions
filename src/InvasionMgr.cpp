@@ -14,6 +14,12 @@
 #include "Group.h"
 #include "Config/Config.h"
 
+#if defined(HAVE_TORTOISEBOTS)
+#include "runtime/PlayerbotAIStorage.h"
+#include "ai/playerbot/PlayerbotAI.h"
+#include "ai/playerbot/BotState.h"
+#endif
+
 #include <cmath>
 #include <cstdio>
 #include <algorithm>
@@ -362,6 +368,87 @@ uint32 InvasionManager::GetInvaderCooldownRemaining(ObjectGuid invaderGuid) cons
     return (itr->second > now) ? uint32(itr->second - now) : 0;
 }
 
+void InvasionManager::EngageBotInCombat(Player* botPlayer, Player* targetPlayer)
+{
+    if (!botPlayer || !targetPlayer || !IsHeadlessBot(botPlayer))
+        return;
+
+    if (!sConfig.GetBoolDefault("Invasion.BotEngagePvP", true))
+        return;
+
+    // 1. Core orientation & facing
+    botPlayer->SetFacingToObject(targetPlayer);
+
+    // 2. Clear any lingering passive movement generators
+    botPlayer->GetMotionMaster()->Clear(false);
+
+    // 3. Target selection & arm auto-attack
+    botPlayer->SetSelectionGuid(targetPlayer->GetObjectGuid());
+    botPlayer->Attack(targetPlayer, true);
+
+#if defined(HAVE_TORTOISEBOTS)
+    PlayerbotAI* ai = GET_PLAYERBOT_AI(botPlayer);
+    if (ai)
+    {
+        // Switch to combat engine immediately
+        ai->ChangeEngine(BotState::BOT_STATE_COMBAT);
+
+        // Apply configured PvP strategies
+        std::string pvpStrats = sConfig.GetStringDefault("Invasion.BotPvPStrategies", "+pvp,+world pvp");
+        if (!pvpStrats.empty())
+            ai->ChangeStrategy(pvpStrats, BotState::BOT_STATE_ALL);
+
+        // Set explicit AI target values
+        if (ai->GetAiObjectContext())
+        {
+            if (auto currentTarget = ai->GetAiObjectContext()->GetValue<Unit*>("current target"))
+                currentTarget->Set(targetPlayer);
+
+            if (auto attackTarget = ai->GetAiObjectContext()->GetValue<ObjectGuid>("attack target"))
+                attackTarget->Set(targetPlayer->GetObjectGuid());
+        }
+
+        // Force bot to act immediately without waiting for normal tick throttle
+        ai->DoNextAction();
+
+        DebugLog("Engaged TortoiseBots AI for bot %s against %s (Strats: %s)",
+                 botPlayer->GetName(), targetPlayer->GetName(), pvpStrats.c_str());
+    }
+#endif
+}
+
+void InvasionManager::ResetBotAI(Player* botPlayer)
+{
+    if (!botPlayer || !IsHeadlessBot(botPlayer))
+        return;
+
+    botPlayer->CombatStop(true);
+    botPlayer->SetSelectionGuid(ObjectGuid());
+    botPlayer->GetMotionMaster()->Clear(false);
+
+    if (!sConfig.GetBoolDefault("Invasion.BotResetAI", true))
+        return;
+
+#if defined(HAVE_TORTOISEBOTS)
+    PlayerbotAI* ai = GET_PLAYERBOT_AI(botPlayer);
+    if (ai)
+    {
+        std::string pvpStrats = sConfig.GetStringDefault("Invasion.BotPvPStrategies", "+pvp,+world pvp");
+        std::string removeStrats = pvpStrats;
+        for (char& c : removeStrats)
+            if (c == '+')
+                c = '-';
+        if (!removeStrats.empty())
+            ai->ChangeStrategy(removeStrats, BotState::BOT_STATE_ALL);
+
+        ai->Reset(true);
+        ai->ResetStrategies(true);
+
+        DebugLog("Reset TortoiseBots AI for bot %s after invasion", botPlayer->GetName());
+    }
+#endif
+}
+
 Player* InvasionManager::PickDefender(Player* invader) const
 {
     bool const invaderIsBot = IsHeadlessBot(invader);
@@ -529,13 +616,12 @@ void InvasionManager::Arrive(Invasion& inv, Player* invader, Player* defender)
     if (!inv.isBotDefender)
         defender->SendAddonMessage("CINV", std::string("I ") + invader->GetName());
 
-    // Bot instant aggression command
+    // Bot instant aggression commands: ensure bots target each other and fight like normal PvP
     if (inv.isBotInvader)
-    {
-        invader->SetSelectionGuid(defender->GetObjectGuid());
-        invader->Attack(defender, true);
-        DebugLog("Bot invader %s commanded to attack defender %s", invader->GetName(), defender->GetName());
-    }
+        EngageBotInCombat(invader, defender);
+
+    if (inv.isBotDefender)
+        EngageBotInCombat(defender, invader);
 }
 
 bool InvasionManager::ArenaForfeit(Invasion& inv, Player* invader, Player* defender, uint32 diff)
@@ -670,6 +756,13 @@ void InvasionManager::Conclude(Invasion& inv, char const* invaderLine, char cons
             GrantBotCooldown(inv.defender);
     }
 
+    // Reset bot AI decision trees and restore default non-combat strategies
+    if (inv.isBotInvader && pInvader)
+        ResetBotAI(pInvader);
+
+    if (inv.isBotDefender && pDefender)
+        ResetBotAI(pDefender);
+
     inv.phase = PHASE_LEAVING;
     inv.timer = delayMs ? delayMs : (sConfig.GetIntDefault("Invasion.ReturnSeconds", 5) * IN_MILLISECONDS);
 
@@ -747,6 +840,7 @@ bool InvasionManager::OnPlayerLogout(Player* player)
 
         if (wasInvader)
         {
+            ResetBotAI(player);
             player->TeleportTo(itr->origin.mapId, itr->origin.x, itr->origin.y,
                                itr->origin.z, itr->origin.o);
 
@@ -754,7 +848,10 @@ bool InvasionManager::OnPlayerLogout(Player* player)
             Tell(defender, "Your forgiver has left this world.");
             HideRadar(defender);
             if (defender)
+            {
                 defender->SetFFAPvP(false);
+                ResetBotAI(defender);
+            }
             ResendPlayerFlags(defender);
             RecordMatch(*itr, ObjectGuid());
         }
@@ -1017,6 +1114,19 @@ void InvasionManager::Update(uint32 diff)
                             defender->SendPlaySpellVisual(MARK_KIT);
                         inv.arrivalFx = false;
                     }
+                }
+
+                // Ensure bots stay actively focused and do not stay static or drop target
+                if (inv.isBotInvader && invader->IsAlive() && defender && defender->IsAlive())
+                {
+                    if (invader->GetSelectionGuid() != defender->GetObjectGuid() || !invader->GetVictim())
+                        EngageBotInCombat(invader, defender);
+                }
+
+                if (inv.isBotDefender && defender && defender->IsAlive() && invader->IsAlive())
+                {
+                    if (defender->GetSelectionGuid() != invader->GetObjectGuid() || !defender->GetVictim())
+                        EngageBotInCombat(defender, invader);
                 }
 
                 if (ArenaForfeit(inv, invader, defender, diff))

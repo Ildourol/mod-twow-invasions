@@ -55,6 +55,8 @@
 - **🕊️ Anti-Grief Respite Timer**: Invaded defenders receive an immunity cooldown (default: 10 minutes) preventing back-to-back harassment.
 - **⏱️ Action Bar Cooldown Wheel**: Configurable invader cooldown (`Invasion.InvaderCooldownSeconds`) preventing spamming and rendering native rotating spell cooldown clocks on the action bar.
 - **⚔️ Same-Faction Invasions**: Configurable toggle (`Invasion.AllowSameFaction = 1`) enabling cross-faction and same-faction Dark Souls-style invasions without core edits.
+- **⚔️ Active Bot PvP Aggression**: Bots immediately face, target, and attack each other on arrival (`Invasion.BotEngagePvP = 1`), applying native TortoiseBots PvP combat strategies (`Invasion.BotPvPStrategies = "+pvp,+world pvp"`).
+- **🔄 Clean Bot AI Reset**: Upon match conclusion or forfeit, bot combat states and decision trees are completely reset (`Invasion.BotResetAI = 1`), cleanly restoring their normal open-world behavior.
 
 ---
 
@@ -75,6 +77,8 @@ Invasion.EnableTalisman = 0
 # Matchmaking & Rules
 Invasion.LevelRange = 3
 Invasion.AllowSameFaction = 1
+Invasion.AllowInCities = 1
+Invasion.AllowInSanctuaries = 1
 Invasion.InvaderCooldownSeconds = 60
 Invasion.WarnSeconds = 5
 Invasion.DurationSeconds = 300
@@ -88,7 +92,7 @@ Invasion.ReviveSeconds = 3
 Invasion.RewardHonor = 75
 Invasion.RewardMoney = 5000
 
-# PlayerBot Phantoms Matrix
+# PlayerBot Phantoms Matrix & AI Pacing
 Invasion.AllowPlayerToBot = 1
 Invasion.AllowBotToPlayer = 1
 Invasion.AllowBotToBot = 1
@@ -96,6 +100,9 @@ Invasion.BotInvasionInterval = 300
 Invasion.BotInvasionChance = 30
 Invasion.BotCooldownSeconds = 600
 Invasion.BotMaxActiveInvasions = 3
+Invasion.BotEngagePvP = 1
+Invasion.BotPvPStrategies = "+pvp,+world pvp"
+Invasion.BotResetAI = 1
 ```
 
 ---

@@ -96,6 +96,8 @@ private:
     void RecordMatch(Invasion const& inv, ObjectGuid winner);
     void AwardRewards(Player* winner, Player* loser);
     void UpdateRevives(uint32 diff);
+    void EngageBotInCombat(Player* botPlayer, Player* targetPlayer);
+    void ResetBotAI(Player* botPlayer);
 
     std::vector<Invasion> m_invasions;
     std::vector<PendingRevive> m_revives;

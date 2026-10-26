@@ -110,3 +110,15 @@ Invasion.BotCooldownSeconds = 600
 
 # Maximum concurrent bot invasions running at the same time across the realm (Default: 3)
 Invasion.BotMaxActiveInvasions = 3
+
+# Force bots to actively engage and attack their opponent when teleported (Default: 1)
+# Ensures both attacker and defender bots target each other and fight like normal PvP
+Invasion.BotEngagePvP = 1
+
+# PvP strategies applied to PlayerBot AI during an invasion duel (Default: "+pvp,+world pvp")
+# Activates native TortoiseBots PvP combat decision trees
+Invasion.BotPvPStrategies = "+pvp,+world pvp"
+
+# Reset bot AI to default non-combat state after an invasion concludes (Default: 1)
+# Restores default strategies and clears lingering combat targets
+Invasion.BotResetAI = 1
