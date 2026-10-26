@@ -131,6 +131,22 @@ namespace
     }
 }
 
+bool InvasionManager::IsInSafeZone(Player const* player) const
+{
+    if (!player)
+        return false;
+
+    // Capital cities and taverns / inns
+    if (player->GetRestType() == REST_TYPE_IN_CITY || player->GetRestType() == REST_TYPE_IN_TAVERN)
+        return true;
+
+    // Sanctuary zones
+    if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+        return true;
+
+    return false;
+}
+
 bool InvasionManager::IsAvailableForInvasion(Player* player) const
 {
     if (!player || !player->IsInWorld() || !player->GetSession())
@@ -150,20 +166,6 @@ bool InvasionManager::IsAvailableForInvasion(Player* player) const
 
     if (player->InBattleGround() || !player->GetMap() || player->GetMap()->Instanceable())
         return false;
-
-    // Check City and Tavern resting protection
-    if (!sConfig.GetBoolDefault("Invasion.AllowInCities", false))
-    {
-        if (player->GetRestType() == REST_TYPE_IN_CITY || player->GetRestType() == REST_TYPE_IN_TAVERN)
-            return false;
-    }
-
-    // Check Sanctuary zone protection
-    if (!sConfig.GetBoolDefault("Invasion.AllowInSanctuaries", false))
-    {
-        if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
-            return false;
-    }
 
     return true;
 }
@@ -215,6 +217,15 @@ bool InvasionManager::CanInvadeFrom(Player* invader) const
     if (invader->IsGameMaster())
     {
         Tell(invader, "Not in GM mode. Type .gm off first.");
+        return false;
+    }
+
+    // Check safe zones / cities for invader
+    bool const allowFromSafeZones = sConfig.GetBoolDefault("Invasion.AllowInvadeFromSafeZones",
+                                    sConfig.GetBoolDefault("Invasion.AllowCastInSafeZones", false));
+    if (!allowFromSafeZones && IsInSafeZone(invader))
+    {
+        Tell(invader, "You cannot invade from a safe zone or city.");
         return false;
     }
 
@@ -296,6 +307,19 @@ bool InvasionManager::IsValidDefender(Player* invader, Player* target) const
 
     if (targetIsBot && HasBotCooldown(target->GetObjectGuid()))
         return false;
+
+    // Defender safe zone protection (City & Sanctuary)
+    if (!sConfig.GetBoolDefault("Invasion.AllowInCities", false))
+    {
+        if (target->GetRestType() == REST_TYPE_IN_CITY || target->GetRestType() == REST_TYPE_IN_TAVERN)
+            return false;
+    }
+
+    if (!sConfig.GetBoolDefault("Invasion.AllowInSanctuaries", false))
+    {
+        if (target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+            return false;
+    }
 
     return IsAvailableForInvasion(target);
 }
@@ -1037,6 +1061,9 @@ void InvasionManager::CheckAutonomousBotInvasions(uint32 diff)
     uint32 const minLevel = sConfig.GetIntDefault("Invasion.MinLevel", 10);
     uint32 const spellId = sConfig.GetIntDefault("Invasion.SpellId", 44090);
 
+    bool const allowFromSafeZones = sConfig.GetBoolDefault("Invasion.AllowInvadeFromSafeZones",
+                                    sConfig.GetBoolDefault("Invasion.AllowCastInSafeZones", false));
+
     std::vector<Player*> botCandidates;
     {
         HashMapHolder<Player>::ReadGuard guard(HashMapHolder<Player>::GetLock());
@@ -1045,7 +1072,9 @@ void InvasionManager::CheckAutonomousBotInvasions(uint32 diff)
             Player* p = itr.second;
             if (p && IsHeadlessBot(p) && p->GetLevel() >= minLevel &&
                 !p->IsInCombat() && !IsInvolved(p->GetObjectGuid()) &&
-                !HasBotCooldown(p->GetObjectGuid()) && IsAvailableForInvasion(p))
+                !HasBotCooldown(p->GetObjectGuid()) &&
+                (allowFromSafeZones || !IsInSafeZone(p)) &&
+                IsAvailableForInvasion(p))
             {
                 botCandidates.push_back(p);
             }
@@ -1110,7 +1139,11 @@ void InvasionManager::Update(uint32 diff)
                 if (inv.timer)
                     break;
 
-                if (!defender || !IsValidDefender(invader, defender) || !IsAvailableForInvasion(invader))
+                bool const allowFromSafeZones = sConfig.GetBoolDefault("Invasion.AllowInvadeFromSafeZones",
+                                                sConfig.GetBoolDefault("Invasion.AllowCastInSafeZones", false));
+
+                if (!defender || !IsValidDefender(invader, defender) || !IsAvailableForInvasion(invader) ||
+                    (!allowFromSafeZones && IsInSafeZone(invader)))
                 {
                     Tell(invader, "Their soul slips from your sight.");
                     Tell(defender, "The cold passes.");

@@ -88,6 +88,7 @@ public:
 private:
     InvasionManager() = default;
 
+    bool IsInSafeZone(Player const* player) const;
     bool CanInvadeFrom(Player* invader) const;
     bool IsAvailableForInvasion(Player* player) const;
     bool IsValidDefender(Player* invader, Player* target) const;

@@ -41,15 +41,20 @@ Invasion.LevelRange = 3
 # 0 = Disabled (Strictly opposing faction only: Alliance vs Horde)
 Invasion.AllowSameFaction = 1
 
-# Allow invasions inside capital cities and taverns / resting areas
-# 0 = Disabled (Default: Cities, taverns, and inns are protected safe zones)
-# 1 = Enabled (Dark Souls-style invasions anywhere in open world)
+# Allow targets inside capital cities and taverns / resting areas to be invaded
+# 0 = Disabled (Default: Cities, taverns, and inns are protected safe zones against being invaded)
+# 1 = Enabled (Allows defending players to be invaded anywhere in cities and taverns)
 Invasion.AllowInCities = 0
 
-# Allow invasions inside peaceful sanctuary zones (Moonglade, Light's Hope, Cenarion Hold)
-# 0 = Disabled (Default: Sanctuary areas are protected safe zones)
+# Allow targets inside peaceful sanctuary zones to be invaded (Moonglade, Light's Hope, Cenarion Hold)
+# 0 = Disabled (Default: Sanctuary areas are protected safe zones against being invaded)
 # 1 = Enabled
 Invasion.AllowInSanctuaries = 0
+
+# Allow casting the invasion rite from safe zones or capital cities
+# 0 = Disabled (Default: Invaders must venture into the open world to cast and initiate an invasion)
+# 1 = Enabled (Invaders can cast and invade from safe zones/cities; defenders in safe zones remain protected)
+Invasion.AllowInvadeFromSafeZones = 0
 
 # Cooldown in seconds placed on the invader after completing an invasion
 # 0 = No cooldown (original ComfyCraft behavior, hunt again immediately)

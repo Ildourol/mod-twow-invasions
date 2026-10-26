@@ -55,6 +55,7 @@
 - **🕊️ Anti-Grief Respite Timer**: Invaded defenders receive an immunity cooldown (default: 10 minutes) preventing back-to-back harassment.
 - **⏱️ Action Bar Cooldown Wheel**: Configurable invader cooldown (`Invasion.InvaderCooldownSeconds`) preventing spamming and rendering native rotating spell cooldown clocks on the action bar.
 - **⚔️ Same-Faction & Cross-Faction Isolation**: Configurable toggle (`Invasion.AllowSameFaction = 1`) enabling cross-faction and same-faction Dark Souls-style invasions. FFA flags are isolated strictly to same-faction matches so friendly bystanders in cross-faction battles are never affected.
+- **🏛️ Safe Zone Cast Isolation**: Configurable toggle (`Invasion.AllowInvadeFromSafeZones = 0`) allowing players/bots to cast the invasion rite from safe zones or capital cities, while preserving complete safe zone immunity for defenders against being invaded.
 - **⚔️ Active Bot PvP Aggression**: Bots immediately face, target, and attack each other on arrival (`Invasion.BotEngagePvP = 1`), applying native TortoiseBots PvP combat strategies (`Invasion.BotPvPStrategies = "+pvp,+world pvp"`).
 - **🔄 Clean Bot AI Reset**: Upon match conclusion or forfeit, bot combat states and decision trees are completely reset (`Invasion.BotResetAI = 1`), cleanly restoring their normal open-world behavior.
 
@@ -79,6 +80,7 @@ Invasion.LevelRange = 3
 Invasion.AllowSameFaction = 1
 Invasion.AllowInCities = 0
 Invasion.AllowInSanctuaries = 0
+Invasion.AllowInvadeFromSafeZones = 0
 Invasion.InvaderCooldownSeconds = 60
 Invasion.WarnSeconds = 5
 Invasion.DurationSeconds = 300
