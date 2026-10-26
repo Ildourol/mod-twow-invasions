@@ -77,8 +77,8 @@ Invasion.EnableTalisman = 0
 # Matchmaking & Rules
 Invasion.LevelRange = 3
 Invasion.AllowSameFaction = 1
-Invasion.AllowInCities = 1
-Invasion.AllowInSanctuaries = 1
+Invasion.AllowInCities = 0
+Invasion.AllowInSanctuaries = 0
 Invasion.InvaderCooldownSeconds = 60
 Invasion.WarnSeconds = 5
 Invasion.DurationSeconds = 300

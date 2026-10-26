@@ -42,14 +42,14 @@ Invasion.LevelRange = 3
 Invasion.AllowSameFaction = 1
 
 # Allow invasions inside capital cities and taverns / resting areas
-# 1 = Enabled (Default, Dark Souls-style invasions anywhere in open world)
-# 0 = Disabled (Cities, taverns, and inns are protected safe zones)
-Invasion.AllowInCities = 1
+# 0 = Disabled (Default: Cities, taverns, and inns are protected safe zones)
+# 1 = Enabled (Dark Souls-style invasions anywhere in open world)
+Invasion.AllowInCities = 0
 
-# Allow invasions inside peaceful sanctuary zones
-# 1 = Enabled (Default)
-# 0 = Disabled (Sanctuary areas are protected safe zones)
-Invasion.AllowInSanctuaries = 1
+# Allow invasions inside peaceful sanctuary zones (Moonglade, Light's Hope, Cenarion Hold)
+# 0 = Disabled (Default: Sanctuary areas are protected safe zones)
+# 1 = Enabled
+Invasion.AllowInSanctuaries = 0
 
 # Cooldown in seconds placed on the invader after completing an invasion
 # 0 = No cooldown (original ComfyCraft behavior, hunt again immediately)
